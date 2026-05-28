@@ -595,21 +595,28 @@ JNIEXPORT void JNICALL Java_dev_onvoid_webrtc_RTCPeerConnection_close
 (JNIEnv * env, jobject caller)
 {
 	webrtc::PeerConnectionInterface * pc = GetHandle<webrtc::PeerConnectionInterface>(env, caller);
-	CHECK_HANDLE(pc);
+	if (pc == nullptr) {
+		return;
+	}
+
+	auto observer = GetHandle<webrtc::PeerConnectionObserver>(env, caller, "observerHandle");
+
+	SetHandle<std::nullptr_t>(env, caller, nullptr);
+	SetHandle<std::nullptr_t>(env, caller, "observerHandle", nullptr);
 
 	try {
 		pc->Close();
-
-		SetHandle<std::nullptr_t>(env, caller, nullptr);
-
-		auto observer = GetHandle<webrtc::PeerConnectionObserver>(env, caller, "observerHandle");
-
-		if (observer) {
-		    SetHandle<std::nullptr_t>(env, caller, "observerHandle", nullptr);
-			delete observer;
-		}
+		pc->Release();
 	}
 	catch (...) {
+		if (observer) {
+			delete observer;
+		}
 		ThrowCxxJavaException(env);
+		return;
+	}
+
+	if (observer) {
+		delete observer;
 	}
 }

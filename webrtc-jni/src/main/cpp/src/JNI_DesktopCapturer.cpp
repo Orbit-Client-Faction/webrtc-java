@@ -28,13 +28,16 @@ JNIEXPORT void JNICALL Java_dev_onvoid_webrtc_media_video_desktop_DesktopCapture
 (JNIEnv * env, jobject caller)
 {
 	jni::DesktopCapturer * capturer = GetHandle<jni::DesktopCapturer>(env, caller);
-	CHECK_HANDLE(capturer);
-
-	delete capturer;
-
-	SetHandle<std::nullptr_t>(env, caller, nullptr);
+	if (capturer == nullptr) {
+		return;
+	}
 
 	auto callback = GetHandle<jni::DesktopCaptureCallback>(env, caller, "callbackHandle");
+
+	SetHandle<std::nullptr_t>(env, caller, nullptr);
+	SetHandle<std::nullptr_t>(env, caller, "callbackHandle", nullptr);
+
+	delete capturer;
 
 	if (callback) {
 		delete callback;

@@ -82,8 +82,11 @@ namespace jni
 		private:
 			static std::unordered_map<std::type_index, std::any> & getFactoryMap()
 			{
-				static std::unordered_map<std::type_index, std::any> map;
-				return map;
+				// These factories own JNI global references. Letting a C++ static
+				// destructor release them during process exit can call back into a
+				// JVM that is already shutting down.
+				static auto * map = new std::unordered_map<std::type_index, std::any>();
+				return *map;
 			}
 #else
 			template <class T>
@@ -139,8 +142,11 @@ namespace jni
 		private:
 			static std::unordered_map<std::type_index, unique_void_ptr> & getFactoryMap()
 			{
-				static std::unordered_map<std::type_index, unique_void_ptr> map;
-				return map;
+				// These factories own JNI global references. Letting a C++ static
+				// destructor release them during process exit can call back into a
+				// JVM that is already shutting down.
+				static auto * map = new std::unordered_map<std::type_index, unique_void_ptr>();
+				return *map;
 			}
 #endif
 	};

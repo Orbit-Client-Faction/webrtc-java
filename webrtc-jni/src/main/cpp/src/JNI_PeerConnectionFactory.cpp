@@ -133,19 +133,24 @@ JNIEXPORT void JNICALL Java_dev_onvoid_webrtc_PeerConnectionFactory_dispose
 (JNIEnv * env, jobject caller)
 {
 	webrtc::PeerConnectionFactoryInterface * factory = GetHandle<webrtc::PeerConnectionFactoryInterface>(env, caller);
-	CHECK_HANDLE(factory);
+	if (factory == nullptr) {
+		return;
+	}
 
 	webrtc::Thread * networkThread = GetHandle<webrtc::Thread>(env, caller, "networkThreadHandle");
 	webrtc::Thread * signalingThread = GetHandle<webrtc::Thread>(env, caller, "signalingThreadHandle");
 	webrtc::Thread * workerThread = GetHandle<webrtc::Thread>(env, caller, "workerThreadHandle");
+
+	SetHandle<std::nullptr_t>(env, caller, nullptr);
+	SetHandle<std::nullptr_t>(env, caller, "networkThreadHandle", nullptr);
+	SetHandle<std::nullptr_t>(env, caller, "signalingThreadHandle", nullptr);
+	SetHandle<std::nullptr_t>(env, caller, "workerThreadHandle", nullptr);
 
 	webrtc::RefCountReleaseStatus status = factory->Release();
 
 	if (status != webrtc::RefCountReleaseStatus::kDroppedLastRef) {
 		env->Throw(jni::JavaError(env, "Native object was not deleted. A reference is still around somewhere."));
 	}
-
-	SetHandle<std::nullptr_t>(env, caller, nullptr);
 
 	factory = nullptr;
 

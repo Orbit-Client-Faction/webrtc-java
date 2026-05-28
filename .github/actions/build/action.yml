@@ -63,7 +63,7 @@ runs:
       shell: bash
 
     - name: Deploy
-      if: ${{ github.event_name != 'pull_request' }}
+      if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
       env:
         MAVEN_USERNAME: ${{ inputs.maven-username }}
         MAVEN_TOKEN: ${{ inputs.maven-password }}

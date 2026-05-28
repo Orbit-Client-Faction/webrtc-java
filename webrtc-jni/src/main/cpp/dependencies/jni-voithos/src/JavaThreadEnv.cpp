@@ -14,13 +14,17 @@ namespace jni
 {
 	JavaThreadEnv::JavaThreadEnv(JavaVM * vm) :
 		vm(vm),
-		env(nullptr)
+		env(nullptr),
+		attached(false)
 	{
 		int status = vm->GetEnv(reinterpret_cast<void**>(&env), JNI_VERSION_1_6);
 
 		if (status == JNI_EDETACHED) {
 			if (vm->AttachCurrentThread(reinterpret_cast<void**>(&env), NULL) != 0) {
 				std::cout << "VM attach current thread failed" << std::endl;
+			}
+			else {
+				attached = true;
 			}
 		}
 
@@ -31,7 +35,9 @@ namespace jni
 
 	JavaThreadEnv::~JavaThreadEnv()
 	{
-		vm->DetachCurrentThread();
+		if (attached) {
+			vm->DetachCurrentThread();
+		}
 
 		//std::cout << "Dettached thread " << std::this_thread::get_id() << std::endl;
 	}

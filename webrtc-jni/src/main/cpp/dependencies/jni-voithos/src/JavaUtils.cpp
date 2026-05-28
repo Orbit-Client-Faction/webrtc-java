@@ -136,6 +136,10 @@ jfieldID GetFieldID(JNIEnv * env, jclass cls, const std::string & fieldName, con
 
 JNIEnv * AttachCurrentThread()
 {
+	if (javaContext == nullptr || javaContext->getVM() == nullptr) {
+		return nullptr;
+	}
+
 	thread_local std::unique_ptr<jni::JavaThreadEnv> threadEnv(new jni::JavaThreadEnv(javaContext->getVM()));
 
 	return threadEnv->getEnv();

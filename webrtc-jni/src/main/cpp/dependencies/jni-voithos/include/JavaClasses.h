@@ -44,14 +44,14 @@ namespace jni
 		private:
 			static std::unordered_map<std::type_index, std::shared_ptr<JavaClass>> & getClassMap()
 			{
-				static std::unordered_map<std::type_index, std::shared_ptr<JavaClass>> map;
-				return map;
+				static auto * map = new std::unordered_map<std::type_index, std::shared_ptr<JavaClass>>();
+				return *map;
 			}
 
 			static std::mutex & getMutex()
 			{
-				static std::mutex mutex;
-				return mutex;
+				static auto * mutex = new std::mutex();
+				return *mutex;
 			}
 
 		private:

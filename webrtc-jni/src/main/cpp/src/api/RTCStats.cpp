@@ -68,7 +68,11 @@ namespace jni
 			return map;
 		}
 
-		const std::map<std::string, uint8_t> typeMap = initTypeMap();
+		const std::map<std::string, uint8_t> & getTypeMap()
+		{
+			static auto * typeMap = new std::map<std::string, uint8_t>(initTypeMap());
+			return *typeMap;
+		}
 
 
 		JavaLocalRef<jobject> toJava(JNIEnv * env, const webrtc::RTCStats & stats)
@@ -90,6 +94,7 @@ namespace jni
 
 			JavaLocalRef<jobject> type = nullptr;
 
+			const auto & typeMap = getTypeMap();
 			auto result = typeMap.find(stats.type());
 			if (result != typeMap.end()) {
 				type = jni::JavaEnums::toJava(env, static_cast<RTCStatsType>(result->second));

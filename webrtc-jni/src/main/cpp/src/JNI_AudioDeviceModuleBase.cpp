@@ -453,7 +453,11 @@ JNIEXPORT void JNICALL Java_dev_onvoid_webrtc_media_audio_AudioDeviceModuleBase_
 (JNIEnv * env, jobject caller)
 {
 	webrtc::AudioDeviceModule * audioModule = GetHandle<webrtc::AudioDeviceModule>(env, caller);
-	CHECK_HANDLE(audioModule);
+	if (audioModule == nullptr) {
+		return;
+	}
+
+	SetHandle<std::nullptr_t>(env, caller, nullptr);
 
 	if (audioModule->Initialized()) {
 		audioModule->Terminate();
@@ -464,8 +468,6 @@ JNIEXPORT void JNICALL Java_dev_onvoid_webrtc_media_audio_AudioDeviceModuleBase_
 	if (status != webrtc::RefCountReleaseStatus::kDroppedLastRef) {
 		RTC_LOG(LS_WARNING) << "Native object was not deleted. A reference is still around somewhere.";
 	}
-
-	SetHandle<std::nullptr_t>(env, caller, nullptr);
 
 	audioModule = nullptr;
 }

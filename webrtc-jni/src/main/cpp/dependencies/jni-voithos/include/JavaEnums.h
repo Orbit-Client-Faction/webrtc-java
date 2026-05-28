@@ -73,8 +73,11 @@ namespace jni
 		private:
 			static std::unordered_map<std::type_index, std::any> & getEnumMap()
 			{
-				static std::unordered_map<std::type_index, std::any> map;
-				return map;
+				// Enum caches own JNI global references. Keep them alive for the
+				// process lifetime so no C++ exit destructor touches JNI after VM
+				// shutdown has started.
+				static auto * map = new std::unordered_map<std::type_index, std::any>();
+				return *map;
 			}
 #else
 			template <class T>
@@ -122,8 +125,11 @@ namespace jni
 		private:
 			static std::unordered_map<std::type_index, unique_void_ptr> & getEnumMap()
 			{
-				static std::unordered_map<std::type_index, unique_void_ptr> map;
-				return map;
+				// Enum caches own JNI global references. Keep them alive for the
+				// process lifetime so no C++ exit destructor touches JNI after VM
+				// shutdown has started.
+				static auto * map = new std::unordered_map<std::type_index, unique_void_ptr>();
+				return *map;
 			}
 #endif
 	};

@@ -120,12 +120,13 @@ namespace jni
 
 	void WebRTCContext::destroy(JNIEnv * env)
 	{
+		audioDevManager = nullptr;
+		videoDevManager = nullptr;
+		powerManagement = nullptr;
+
 		if (!webrtc::CleanupSSL()) {
 			env->Throw(jni::JavaError(env, "Cleanup SSL failed"));
 		}
-
-		audioDevManager = nullptr;
-		videoDevManager = nullptr;
 	}
 
 	avdev::AudioDeviceManager * WebRTCContext::getAudioDeviceManager()
