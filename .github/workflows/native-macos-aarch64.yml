@@ -2,6 +2,11 @@ name: Native macOS aarch64
 
 on:
   workflow_dispatch:
+    inputs:
+      ref:
+        description: Branch, tag, or SHA to build.
+        required: true
+        default: orbit/webrtc-java-0.14.0-fix
 
 env:
   WEBRTC_CACHE_BRANCH: 7204
@@ -17,6 +22,8 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v5
+        with:
+          ref: ${{ inputs.ref }}
 
       - name: Prepare build
         uses: ./.github/actions/prepare-macos
@@ -50,8 +57,9 @@ jobs:
         run: |
           set -euo pipefail
           lib=libwebrtc-java-macos-aarch64.dylib
+          jars=(webrtc-jni/target/webrtc-java-*-macos-aarch64.jar)
           mkdir -p cdn
-          unzip -j webrtc-jni/target/webrtc-java-0.14.0-macos-aarch64.jar "$lib" -d cdn
+          unzip -j "${jars[0]}" "$lib" -d cdn
           archs="$(lipo -archs "cdn/$lib")"
           if [ "$archs" != "arm64" ]; then
             echo "::error::$lib is built for '$archs' instead of arm64 alone"
@@ -66,7 +74,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: webrtc-java-0.14.0-macos-aarch64
-          path: webrtc-jni/target/webrtc-java-0.14.0-macos-aarch64.jar
+          path: webrtc-jni/target/webrtc-java-*-macos-aarch64.jar
           if-no-files-found: error
 
       - name: Upload CDN files
